@@ -81,7 +81,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-5">
           <div className="flex items-center justify-between h-16">
             {/* LOGO */}
-            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+            <Link to="/" className="flex items-center gap-2 shrink-0">
               <motion.div
                 whileHover={{
                   rotate: [0, -8, 8, 0],
@@ -190,7 +190,7 @@ export default function Navbar() {
                         exit={{
                           scale: 0,
                         }}
-                        className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shadow"
+                        className="absolute -top-1 -right-1 min-w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shadow"
                       >
                         {cartItems.length > 99 ? "99+" : cartItems.length}
                       </motion.span>
