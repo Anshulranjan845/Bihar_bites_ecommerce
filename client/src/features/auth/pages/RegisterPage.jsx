@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
 import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "USER" });
+  const isDev = useMemo(() => import.meta.env.DEV, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -35,6 +36,21 @@ export default function RegisterPage() {
           <input type="text" name="name" placeholder="Full Name" onChange={handleChange} className="w-full rounded-xl border border-zinc-300 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500" required />
           <input type="email" name="email" placeholder="Email" onChange={handleChange} className="w-full rounded-xl border border-zinc-300 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500" required />
           <input type="password" name="password" placeholder="Password" onChange={handleChange} className="w-full rounded-xl border border-zinc-300 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500" required />
+
+          {isDev && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Role (Development Only)</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-zinc-300 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          )}
           <button type="submit" className="w-full rounded-xl bg-orange-600 text-white p-3 font-semibold hover:bg-orange-700 transition">Create Account</button>
           <p className="text-sm text-zinc-600">Already have an account? <Link to="/login" className="text-orange-700 font-semibold hover:underline">Login</Link></p>
         </form>
