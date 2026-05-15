@@ -21,6 +21,7 @@ export default function CheckoutPage() {
         ]);
 
         setCart(cartRes?.data?.cartItems || []);
+        setCart(cartRes.data.items || []);
         setAddresses(addressRes.data.data || []);
       } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to load checkout data");
