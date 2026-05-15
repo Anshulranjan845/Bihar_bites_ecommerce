@@ -110,6 +110,8 @@ export default function CheckoutPage() {
   };
 
   const handleCheckout = async () => {
+    if (placingOrder) return;
+
     if (!selectedAddress) {
       toast.error("Please select a delivery address");
       return;
@@ -123,12 +125,16 @@ export default function CheckoutPage() {
     try {
       setPlacingOrder(true);
 
+      console.log("CHECKOUT STARTED");
+
       const orderResponse = await createOrder({
         addressId: selectedAddress,
         paymentMethod: "CASHFREE",
       });
 
-      const orderId = orderResponse?.data?.id;
+      console.log("ORDER RESPONSE:", orderResponse.data);
+
+      const orderId = orderResponse?.data?.data?.id;
 
       if (!orderId) {
         throw new Error("Order ID missing");
@@ -136,7 +142,9 @@ export default function CheckoutPage() {
 
       const paymentResponse = await createPaymentOrder(orderId);
 
-      const paymentLink = paymentResponse?.data?.payment_link;
+      console.log("PAYMENT RESPONSE:", paymentResponse.data);
+
+      const paymentLink = paymentResponse?.data?.data?.payment_link;
 
       if (!paymentLink) {
         throw new Error("Payment link not received");
@@ -144,8 +152,12 @@ export default function CheckoutPage() {
 
       window.location.href = paymentLink;
     } catch (error) {
+      console.error(error);
+
       toast.error(
-        error?.response?.data?.message || "Failed to initiate payment",
+        error?.response?.data?.message ||
+          error.message ||
+          "Failed to initiate payment",
       );
     } finally {
       setPlacingOrder(false);
