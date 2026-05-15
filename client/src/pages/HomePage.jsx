@@ -28,6 +28,7 @@ export default function HomePage() {
           api.get("/categories"),
         ]);
 
+        setProducts(productsRes.products || []);
         setProducts(productsRes.data || []);
         setCategories(categoriesRes?.data?.data || []);
       } catch (error) {

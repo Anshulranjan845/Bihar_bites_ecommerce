@@ -37,7 +37,7 @@ export default function ProductsPage() {
           category: selectedCategory,
         });
 
-        setProducts(response.data);
+        setProducts(response.products);
 
         setPagination(response.pagination);
       } catch (error) {
