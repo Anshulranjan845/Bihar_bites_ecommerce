@@ -49,7 +49,7 @@ export const createCashfreeOrder = async (orderId, user) => {
 export const verifyPayment = async (orderId) => {
   const response = await cashfree.PGFetchOrder(orderId);
 
-  console.log("CASHFREE VERIFY RESPONSE:", response.data);
+  console.log("CASHFREE STATUS:", response.data);
 
   const paymentStatus = response.data.order_status;
 
@@ -67,7 +67,7 @@ export const verifyPayment = async (orderId) => {
 
     return {
       success: true,
-      status: "PAID",
+      status: paymentStatus,
       message: "Payment successful",
     };
   }
@@ -78,14 +78,14 @@ export const verifyPayment = async (orderId) => {
     },
 
     data: {
-      paymentStatus: "FAILED",
-      orderStatus: "CANCELLED",
+      paymentStatus: paymentStatus,
+      orderStatus: "PAYMENT_PENDING",
     },
   });
 
   return {
     success: false,
     status: paymentStatus,
-    message: "Payment failed or cancelled",
+    message: "Payment was not completed",
   };
 };
