@@ -20,6 +20,7 @@ export default function CheckoutPage() {
           api.get("/users/addresses"),
         ]);
 
+        setCart(cartRes?.data?.cartItems || []);
         setCart(cartRes.data.items || []);
         setAddresses(addressRes.data.data || []);
       } catch (error) {
