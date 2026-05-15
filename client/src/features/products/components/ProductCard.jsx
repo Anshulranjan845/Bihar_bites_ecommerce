@@ -11,6 +11,11 @@ export default function ProductCard({ product }) {
     try {
       const response = await addToCart({ productId: product.id, quantity: 1 });
       syncFromCartResponse(response);
+
+export default function ProductCard({ product }) {
+  const handleQuickAdd = async () => {
+    try {
+      await addToCart({ productId: product.id, quantity: 1 });
       toast.success("Added to cart");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Please login to add items");
