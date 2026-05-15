@@ -1,5 +1,4 @@
 import prisma from "../../lib/prisma.js";
-
 import cashfree from "../../config/cashfree.js";
 
 export const createCashfreeOrder = async (orderId, user) => {
@@ -22,11 +21,8 @@ export const createCashfreeOrder = async (orderId, user) => {
 
     customer_details: {
       customer_id: user.userId,
-
       customer_name: user.name || "Customer",
-
-      customer_email: user.email,
-
+      customer_email: user.email || "customer@email.com",
       customer_phone: "9999999999",
     },
 
@@ -53,6 +49,8 @@ export const createCashfreeOrder = async (orderId, user) => {
 export const verifyPayment = async (orderId) => {
   const response = await cashfree.PGFetchOrder(orderId);
 
+  console.log("CASHFREE VERIFY RESPONSE:", response.data);
+
   const paymentStatus = response.data.order_status;
 
   if (paymentStatus === "PAID") {
@@ -63,13 +61,31 @@ export const verifyPayment = async (orderId) => {
 
       data: {
         paymentStatus: "PAID",
+        orderStatus: "CONFIRMED",
       },
     });
 
     return {
       success: true,
+      status: "PAID",
+      message: "Payment successful",
     };
   }
 
-  throw new Error("Payment not completed");
+  await prisma.order.update({
+    where: {
+      id: orderId,
+    },
+
+    data: {
+      paymentStatus: "FAILED",
+      orderStatus: "CANCELLED",
+    },
+  });
+
+  return {
+    success: false,
+    status: paymentStatus,
+    message: "Payment failed or cancelled",
+  };
 };

@@ -1,15 +1,91 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+
+import api from "../api/axios";
 
 export default function PaymentSuccessPage() {
+  const [searchParams] = useSearchParams();
+
+  const [loading, setLoading] = useState(true);
+
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      try {
+        const orderId = searchParams.get("order_id");
+
+        if (!orderId) {
+          setMessage("Invalid order");
+          return;
+        }
+
+        const response = await api.get(`/payments/verify/${orderId}`);
+
+        console.log("VERIFY RESPONSE:", response.data);
+
+        if (response.data.success) {
+          setPaymentSuccess(true);
+          setMessage("Payment successful");
+        } else {
+          setPaymentSuccess(false);
+          setMessage("Payment failed or cancelled");
+        }
+      } catch (error) {
+        console.error(error);
+
+        setPaymentSuccess(false);
+
+        setMessage(
+          error?.response?.data?.message || "Payment verification failed",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl">
+        Verifying payment...
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-green-50 flex items-center justify-center px-5">
-      <div className="max-w-lg w-full bg-white border border-green-200 rounded-3xl p-8 text-center shadow-sm">
-        <h1 className="text-3xl font-bold text-green-700">Payment Successful 🎉</h1>
-        <p className="mt-3 text-zinc-700">Your order has been placed successfully. We’ll start processing it right away.</p>
-        <div className="mt-7 flex justify-center gap-3">
-          <Link to="/products" className="px-5 py-2.5 rounded-xl bg-zinc-900 text-white hover:bg-zinc-700">Continue Shopping</Link>
-          <Link to="/" className="px-5 py-2.5 rounded-xl border border-zinc-300 hover:bg-zinc-100">Go Home</Link>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-100 px-4">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+        {paymentSuccess ? (
+          <>
+            <h1 className="text-3xl font-bold text-green-600 mb-4">
+              Payment Successful
+            </h1>
+
+            <p className="text-zinc-600 mb-6">
+              Your order has been placed successfully.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl font-bold text-red-600 mb-4">
+              Payment Failed
+            </h1>
+
+            <p className="text-zinc-600 mb-6">{message}</p>
+          </>
+        )}
+
+        <Link
+          to="/"
+          className="inline-block bg-black text-white px-6 py-3 rounded-xl"
+        >
+          Go To Home
+        </Link>
       </div>
     </div>
   );
