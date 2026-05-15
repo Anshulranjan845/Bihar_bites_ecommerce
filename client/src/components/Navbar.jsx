@@ -96,7 +96,7 @@ export default function Navbar() {
 
               <span
                 className={`text-xl font-extrabold tracking-tight transition-colors duration-500 ${
-                  isTransparent ? "text-white" : "text-zinc-900"
+                  isTransparent ? "text-shadow-zinc-700" : "text-zinc-900"
                 }`}
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
