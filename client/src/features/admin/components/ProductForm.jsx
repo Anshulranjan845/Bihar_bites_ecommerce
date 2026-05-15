@@ -22,6 +22,8 @@ export default function ProductForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const descriptionWords = formData.description.trim() ? formData.description.trim().split(/\s+/).length : 0;
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
