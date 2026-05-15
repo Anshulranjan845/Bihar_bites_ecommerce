@@ -5,7 +5,7 @@ import {
   getSingleProduct,
   updateProduct,
 } from "./product.service.js";
-import { uploadToCloudinary } from "../../utils/uploadToCloudinary.js";
+import { uploadToCloudinary } from "../../utils/UploadToCloudinary.js";
 
 import { createProductSchema } from "./product.validation.js";
 
