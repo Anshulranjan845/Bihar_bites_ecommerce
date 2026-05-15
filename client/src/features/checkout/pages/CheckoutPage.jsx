@@ -55,7 +55,20 @@ export default function CheckoutPage() {
         paymentMethod: "CASHFREE",
       });
 
-      window.location.href = response.paymentLink;
+      const orderId = orderResponse?.data?.id;
+
+      if (!orderId) {
+        throw new Error("Order was created but order id is missing");
+      }
+
+      const paymentResponse = await createPaymentOrder(orderId);
+      const paymentLink = paymentResponse?.data?.payment_link;
+
+      if (!paymentLink) {
+        throw new Error("Payment link not received");
+      }
+
+      window.location.href = paymentLink;
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to initiate payment");
     } finally {
