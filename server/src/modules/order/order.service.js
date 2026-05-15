@@ -1,6 +1,7 @@
 import prisma from "../../lib/prisma.js";
 
 export const createOrder = async (userId, addressId, paymentMethod) => {
+  console.log("CHECKOUT USER:", userId);
   const cart = await prisma.cart.findUnique({
     where: {
       userId,
@@ -14,7 +15,7 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
       },
     },
   });
-
+  console.log("CART:", JSON.stringify(cart, null, 2));
   if (!cart || cart.cartItems.length === 0) {
     throw new Error("Cart is empty");
   }
