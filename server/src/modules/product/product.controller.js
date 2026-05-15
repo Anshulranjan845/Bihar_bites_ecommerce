@@ -5,7 +5,7 @@ import {
   getSingleProduct,
   updateProduct,
 } from "./product.service.js";
-import { uploadToCloudinary } from "../../utils/uploadToCloudinary.js";
+import { uploadToCloudinary } from "../../utils/UploadToCloudinary.js";
 
 import { createProductSchema } from "./product.validation.js";
 
@@ -27,6 +27,8 @@ export const create = async (req, res) => {
       stock: Number(req.body.stock),
 
       isFeatured: req.body.isFeatured === "true",
+
+      isAvailable: req.body.isAvailable === "true",
 
       image: imageUrl,
     });

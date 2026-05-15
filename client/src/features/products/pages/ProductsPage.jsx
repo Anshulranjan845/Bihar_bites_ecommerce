@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import Container from "../../../components/Container";
 
@@ -20,6 +21,8 @@ export default function ProductsPage() {
 
   const [pagination, setPagination] = useState({});
   const [debouncedSearch] = useDebounce(search, 500);
+  const [searchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category") || "";
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,6 +33,8 @@ export default function ProductsPage() {
           sort,
 
           page,
+
+          category: selectedCategory,
         });
 
         setProducts(response.data);
@@ -41,7 +46,7 @@ export default function ProductsPage() {
     };
 
     fetchProducts();
-  }, [debouncedSearch, sort, page]);
+  }, [debouncedSearch, sort, page, selectedCategory]);
 
   return (
     <Container>

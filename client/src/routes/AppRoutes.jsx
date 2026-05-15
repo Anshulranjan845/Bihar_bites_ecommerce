@@ -23,6 +23,7 @@ import CheckoutPage from "../features/checkout/pages/CheckoutPage";
 import PaymentSuccessPage from "../pages/PaymentSuccessPage";
 
 import PaymentFailedPage from "../pages/PaymentFailedPage";
+import UnauthorizedPage from "../pages/UnauthorizedPage";
 
 import AdminLayout from "../layouts/AdminLayout";
 
@@ -62,11 +63,14 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="login" element={<LoginPage />} />
+
+        <Route path="register" element={<RegisterPage />} />
+
+        <Route path="unauthorized" element={<UnauthorizedPage />} />
       </Route>
 
-      <Route path="/login" element={<LoginPage />} />
-
-      <Route path="/register" element={<RegisterPage />} />
 
       <Route
         path="/products"
