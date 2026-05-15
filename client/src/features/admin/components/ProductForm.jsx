@@ -67,11 +67,6 @@ export default function ProductForm() {
     setSuccessMessage("");
 
     try {
-      if (descriptionWords > 200) {
-        setErrorMessage("Description must be 200 words or fewer");
-        return;
-      }
-
       setSubmitting(true);
       await createProduct(formData, imageFile);
       setSuccessMessage("Product created successfully.");
@@ -90,8 +85,7 @@ export default function ProductForm() {
 
       <input type="text" name="slug" placeholder="Slug" value={formData.slug} onChange={handleChange} className="w-full border p-3 rounded" required />
 
-      <textarea name="description" placeholder="Description (max 200 words)" value={formData.description} onChange={handleChange} className="w-full border p-3 rounded" rows={4} />
-      <p className="text-xs text-gray-500">{descriptionWords}/200 words</p>
+      <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full border p-3 rounded" rows={4} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="number" min="0" step="0.01" name="price" placeholder="Price" value={formData.price} onChange={handleChange} className="w-full border p-3 rounded" required />
@@ -124,7 +118,7 @@ export default function ProductForm() {
 
       <input
         type="file"
-        accept=".jpg,.jpeg,.png,.webp"
+        accept="image/*"
         onChange={(e) => setImageFile(e.target.files?.[0] || null)}
         className="w-full border p-3 rounded"
       />
