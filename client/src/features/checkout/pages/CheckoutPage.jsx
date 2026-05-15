@@ -3,8 +3,8 @@ import toast from "react-hot-toast";
 
 import { getCart } from "../../cart/services/cartService";
 import api from "../../../api/axios";
+
 import { createOrder, createPaymentOrder } from "../services/checkoutService";
-import { createOrder } from "../services/checkoutService";
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState([]);
@@ -22,10 +22,11 @@ export default function CheckoutPage() {
         ]);
 
         setCart(cartRes?.data?.cartItems || []);
-        setCart(cartRes.data.items || []);
-        setAddresses(addressRes.data.data || []);
+        setAddresses(addressRes?.data?.data || []);
       } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to load checkout data");
+        toast.error(
+          error?.response?.data?.message || "Failed to load checkout data",
+        );
       } finally {
         setLoading(false);
       }
@@ -35,8 +36,12 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = useMemo(
-    () => cart.reduce((acc, item) => acc + Number(item?.product?.price || 0) * Number(item?.quantity || 0), 0),
-    () => cart.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0),
+    () =>
+      cart.reduce(
+        (acc, item) =>
+          acc + Number(item?.product?.price || 0) * Number(item?.quantity || 0),
+        0,
+      ),
     [cart],
   );
 
@@ -52,8 +57,8 @@ export default function CheckoutPage() {
 
     try {
       setPlacingOrder(true);
+
       const orderResponse = await createOrder({
-      const response = await createOrder({
         addressId: selectedAddress,
         paymentMethod: "CASHFREE",
       });
@@ -65,6 +70,7 @@ export default function CheckoutPage() {
       }
 
       const paymentResponse = await createPaymentOrder(orderId);
+
       const paymentLink = paymentResponse?.data?.payment_link;
 
       if (!paymentLink) {
@@ -73,32 +79,54 @@ export default function CheckoutPage() {
 
       window.location.href = paymentLink;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to initiate payment");
+      toast.error(
+        error?.response?.data?.message || "Failed to initiate payment",
+      );
     } finally {
       setPlacingOrder(false);
     }
   };
 
   if (loading) {
-    return <div className="p-10 text-center text-zinc-600">Loading checkout...</div>;
+    return (
+      <div className="p-10 text-center text-zinc-600">Loading checkout...</div>
+    );
   }
 
   return (
     <section className="bg-zinc-50 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-5 grid lg:grid-cols-[1.4fr_1fr] gap-8">
+        {/* LEFT SIDE */}
         <div className="space-y-6">
+          {/* HEADER */}
           <div className="rounded-2xl bg-white border border-zinc-200 p-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-zinc-900">Secure Checkout</h1>
-            <p className="text-zinc-600 mt-2">Select your delivery address and review order summary before payment.</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-zinc-900">
+              Secure Checkout
+            </h1>
+
+            <p className="text-zinc-600 mt-2">
+              Select your delivery address and review your order before payment.
+            </p>
           </div>
 
+          {/* ADDRESS SECTION */}
           <div className="rounded-2xl bg-white border border-zinc-200 p-6">
             <h2 className="text-xl font-bold mb-4">Delivery Address</h2>
+
             <div className="space-y-3">
-              {addresses.length === 0 && <p className="text-zinc-600">No saved addresses found.</p>}
+              {addresses.length === 0 && (
+                <p className="text-zinc-600">No saved addresses found.</p>
+              )}
 
               {addresses.map((address) => (
-                <label key={address.id} className={`block rounded-xl border p-4 cursor-pointer transition ${selectedAddress === address.id ? "border-blue-600 bg-blue-50" : "border-zinc-200 hover:border-zinc-300"}`}>
+                <label
+                  key={address.id}
+                  className={`block rounded-xl border p-4 cursor-pointer transition ${
+                    selectedAddress === address.id
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-zinc-200 hover:border-zinc-300"
+                  }`}
+                >
                   <input
                     type="radio"
                     name="address"
@@ -106,28 +134,56 @@ export default function CheckoutPage() {
                     checked={selectedAddress === address.id}
                     onChange={(e) => setSelectedAddress(e.target.value)}
                   />
-                  <span className="ml-3 text-zinc-800 font-medium">{address.fullName}</span>
-                  <p className="ml-7 text-sm text-zinc-600">{address.addressLine}, {address.city}, {address.state} - {address.postalCode}</p>
+
+                  <span className="ml-3 text-zinc-800 font-medium">
+                    {address.fullName}
+                  </span>
+
+                  <p className="ml-7 text-sm text-zinc-600">
+                    {address.addressLine}, {address.city}, {address.state} -{" "}
+                    {address.postalCode}
+                  </p>
                 </label>
               ))}
             </div>
           </div>
         </div>
 
+        {/* RIGHT SIDE */}
         <aside className="rounded-2xl bg-white border border-zinc-200 p-6 h-fit sticky top-24">
           <h2 className="text-xl font-bold mb-4">Price Details</h2>
 
           <div className="space-y-3 text-sm">
             {cart.map((item) => (
-              <div key={item.id} className="flex justify-between gap-4 text-zinc-700">
-                <span className="line-clamp-1">{item.product.name} × {item.quantity}</span>
-                <span className="font-medium">₹{Number(item.product.price) * item.quantity}</span>
+              <div
+                key={item.id}
+                className="flex justify-between gap-4 text-zinc-700"
+              >
+                <span className="line-clamp-1">
+                  {item.product.name} × {item.quantity}
+                </span>
+
+                <span className="font-medium">
+                  ₹{Number(item.product.price) * item.quantity}
+                </span>
               </div>
             ))}
 
-            <div className="pt-3 border-t flex justify-between"><span>Subtotal</span><span>₹{subtotal}</span></div>
-            <div className="flex justify-between"><span>Delivery</span><span>{deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}</span></div>
-            <div className="flex justify-between"><span>Platform Fee</span><span>₹{platformFee}</span></div>
+            <div className="pt-3 border-t flex justify-between">
+              <span>Subtotal</span>
+              <span>₹{subtotal}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Delivery</span>
+
+              <span>{deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Platform Fee</span>
+              <span>₹{platformFee}</span>
+            </div>
           </div>
 
           <div className="mt-4 pt-4 border-t flex justify-between text-lg font-bold text-zinc-900">
