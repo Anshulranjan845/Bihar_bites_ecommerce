@@ -8,6 +8,7 @@ import crypto from "crypto";
 import transporter from "../../config/mail.js";
 
 import { generateResetToken } from "../../utils/generateResetToken.js";
+import { env } from "../../config/env.js";
 
 export const registerUser = async (data) => {
   const existingUser = await prisma.user.findUnique({
@@ -22,11 +23,14 @@ export const registerUser = async (data) => {
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
+  const assignedRole = env.NODE_ENV === "development" ? data.role || "USER" : "USER";
+
   const user = await prisma.user.create({
     data: {
       name: data.name,
       email: data.email,
       password: hashedPassword,
+      role: assignedRole,
     },
 
     select: {
