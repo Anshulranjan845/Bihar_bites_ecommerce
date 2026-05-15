@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import { getCart } from "../../cart/services/cartService";
 import api from "../../../api/axios";
-import { createOrder, createPaymentOrder } from "../services/checkoutService";
+import { createOrder } from "../services/checkoutService";
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState([]);
@@ -21,6 +21,7 @@ export default function CheckoutPage() {
         ]);
 
         setCart(cartRes?.data?.cartItems || []);
+        setCart(cartRes.data.items || []);
         setAddresses(addressRes.data.data || []);
       } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to load checkout data");
@@ -33,7 +34,7 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = useMemo(
-    () => cart.reduce((acc, item) => acc + Number(item?.product?.price || 0) * Number(item?.quantity || 0), 0),
+    () => cart.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0),
     [cart],
   );
 
@@ -49,7 +50,7 @@ export default function CheckoutPage() {
 
     try {
       setPlacingOrder(true);
-      const orderResponse = await createOrder({
+      const response = await createOrder({
         addressId: selectedAddress,
         paymentMethod: "CASHFREE",
       });
