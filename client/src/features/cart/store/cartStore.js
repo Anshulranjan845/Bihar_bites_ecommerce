@@ -5,7 +5,12 @@ const useCartStore = create((set) => ({
 
   setCart: (items) =>
     set({
-      cartItems: items,
+      cartItems: items || [],
+    }),
+
+  syncFromCartResponse: (cartResponse) =>
+    set({
+      cartItems: cartResponse?.data?.cartItems || [],
     }),
 }));
 
