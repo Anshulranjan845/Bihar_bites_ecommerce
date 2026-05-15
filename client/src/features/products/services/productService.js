@@ -9,7 +9,7 @@ export const getProducts = async (params) => {
 };
 
 export const getProductBySlug = async (slug) => {
-  const response = await api.get(`/products/${slug}`);
+  const response = await api.get(`/products/slug/${slug}`);
 
   return response.data;
 };

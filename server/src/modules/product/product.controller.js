@@ -3,9 +3,10 @@ import {
   deleteProduct,
   getAllProducts,
   getSingleProduct,
+  getSingleProductBySlug,
   updateProduct,
 } from "./product.service.js";
-import { uploadToCloudinary } from "../../utils/uploadToCloudinary.js";
+import { uploadToCloudinary } from "../../utils/UploadToCloudinary.js";
 
 import { createProductSchema } from "./product.validation.js";
 
@@ -27,6 +28,8 @@ export const create = async (req, res) => {
       stock: Number(req.body.stock),
 
       isFeatured: req.body.isFeatured === "true",
+
+      isAvailable: req.body.isAvailable === "true",
 
       image: imageUrl,
     });
@@ -65,6 +68,22 @@ export const getAll = async (req, res) => {
 export const getSingle = async (req, res) => {
   try {
     const product = await getSingleProduct(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getSingleBySlug = async (req, res) => {
+  try {
+    const product = await getSingleProductBySlug(req.params.slug);
 
     res.status(200).json({
       success: true,
