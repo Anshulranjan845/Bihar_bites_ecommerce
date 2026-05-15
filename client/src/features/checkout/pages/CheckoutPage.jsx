@@ -35,7 +35,7 @@ export default function CheckoutPage() {
           api.get("/users/addresses"),
         ]);
 
-        const cartItems = cartRes?.data?.data?.cartItems || [];
+        const cartItems = cartRes?.data?.cartItems || [];
 
         const savedAddresses = addressRes?.data?.data || [];
 
