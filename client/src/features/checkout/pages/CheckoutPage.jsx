@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 
 import { getCart } from "../../cart/services/cartService";
 import api from "../../../api/axios";
+import { createOrder, createPaymentOrder } from "../services/checkoutService";
 import { createOrder } from "../services/checkoutService";
 
 export default function CheckoutPage() {
@@ -34,6 +35,7 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = useMemo(
+    () => cart.reduce((acc, item) => acc + Number(item?.product?.price || 0) * Number(item?.quantity || 0), 0),
     () => cart.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0),
     [cart],
   );
@@ -50,6 +52,7 @@ export default function CheckoutPage() {
 
     try {
       setPlacingOrder(true);
+      const orderResponse = await createOrder({
       const response = await createOrder({
         addressId: selectedAddress,
         paymentMethod: "CASHFREE",

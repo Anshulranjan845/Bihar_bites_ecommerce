@@ -2,6 +2,15 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import { addToCart } from "../../cart/services/cartService";
+import useCartStore from "../../cart/store/cartStore";
+
+export default function ProductCard({ product }) {
+  const syncFromCartResponse = useCartStore((state) => state.syncFromCartResponse);
+
+  const handleQuickAdd = async () => {
+    try {
+      const response = await addToCart({ productId: product.id, quantity: 1 });
+      syncFromCartResponse(response);
 
 export default function ProductCard({ product }) {
   const handleQuickAdd = async () => {

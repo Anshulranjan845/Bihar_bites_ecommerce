@@ -6,9 +6,8 @@ import RegisterPage from "../features/auth/pages/RegisterPage";
 
 import HomePage from "../pages/HomePage";
 
-import AdminDashboard from "../pages/AdminDashboard";
-
 import ProtectedRoute from "./ProtectedRoute";
+import PublicOnlyRoute from "./PublicOnlyRoute";
 
 import AdminRoute from "./AdminRoute";
 
@@ -33,7 +32,6 @@ import AdminProductsPage from "../features/admin/pages/AdminProductsPage";
 
 import CreateProductPage from "../features/admin/pages/CreateProductPage";
 import MainLayout from "../layouts/MainLayout";
-import Container from "../components/Container";
 import { lazy, Suspense } from "react";
 
 export default function AppRoutes() {
@@ -81,29 +79,13 @@ export default function AppRoutes() {
         }
       />
 
-      <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
 
-      <Route path="/payment-success" element={<PaymentSuccessPage />} />
+        <Route path="register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
 
-      <Route path="/payment-failed" element={<PaymentFailedPage />} />
+        <Route path="unauthorized" element={<UnauthorizedPage />} />
+      </Route>
 
-      <Route
-        path="/cart"
-        element={
-          <ProtectedRoute>
-            <CartPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/checkout"
-        element={
-          <ProtectedRoute>
-            <CheckoutPage />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/admin"
