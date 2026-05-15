@@ -28,6 +28,8 @@ export const create = async (req, res) => {
 
       isFeatured: req.body.isFeatured === "true",
 
+      isAvailable: req.body.isAvailable === "true",
+
       image: imageUrl,
     });
 
