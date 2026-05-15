@@ -14,6 +14,24 @@ export default function ProductCard({ product }) {
       toast.success("Added to cart");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Please login to add items");
+  const syncFromCartResponse = useCartStore(
+    (state) => state.syncFromCartResponse,
+  );
+
+  const handleQuickAdd = async () => {
+    try {
+      const response = await addToCart({
+        productId: product.id,
+        quantity: 1,
+      });
+
+      syncFromCartResponse(response);
+
+      toast.success("Added to cart");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Please login to add items",
+      );
     }
   };
 
@@ -38,6 +56,27 @@ export default function ProductCard({ product }) {
             Details
           </Link>
           <button onClick={handleQuickAdd} className="bg-black text-white px-4 py-2 rounded hover:bg-zinc-700">
+
+        <h2 className="text-lg font-semibold">{product.name}</h2>
+
+        <p className="text-gray-600 line-clamp-2 min-h-10">
+          {product.description || "Authentic Bihar product."}
+        </p>
+
+        <p className="text-gray-900 font-bold">₹{product.price}</p>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            to={`/products/${product.slug}`}
+            className="inline-block text-center border border-zinc-300 text-zinc-800 px-4 py-2 rounded hover:bg-zinc-100"
+          >
+            Details
+          </Link>
+
+          <button
+            onClick={handleQuickAdd}
+            className="bg-black text-white px-4 py-2 rounded hover:bg-zinc-700"
+          >
             Add to Cart
           </button>
         </div>
