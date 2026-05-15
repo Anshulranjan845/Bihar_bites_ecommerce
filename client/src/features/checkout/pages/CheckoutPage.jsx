@@ -134,7 +134,7 @@ export default function CheckoutPage() {
 
       console.log("ORDER RESPONSE:", orderResponse.data);
 
-      const orderId = orderResponse?.data?.data?.id;
+      const orderId = orderResponse?.data?.id;
 
       if (!orderId) {
         throw new Error("Order ID missing");
@@ -144,7 +144,7 @@ export default function CheckoutPage() {
 
       console.log("PAYMENT RESPONSE:", paymentResponse.data);
 
-      const paymentLink = paymentResponse?.data?.data?.payment_link;
+      const paymentLink = paymentResponse?.data?.payment_link;
 
       if (!paymentLink) {
         throw new Error("Payment link not received");
