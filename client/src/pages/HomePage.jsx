@@ -29,6 +29,7 @@ export default function HomePage() {
         ]);
 
         setProducts(productsRes.products || []);
+        setProducts(productsRes.data || []);
         setCategories(categoriesRes?.data?.data || []);
       } catch (error) {
         console.log(error);
