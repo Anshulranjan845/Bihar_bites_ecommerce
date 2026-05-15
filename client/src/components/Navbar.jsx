@@ -355,7 +355,7 @@ export default function Navbar() {
                           }
                     }
                     className={`block w-5 h-0.5 rounded-full ${
-                      isTransparent ? "bg-white" : "bg-zinc-800"
+                      isTransparent ? "bg-zinc-600" : "bg-zinc-800"
                     }`}
                   />
                 ))}
