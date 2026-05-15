@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { load } from "@cashfreepayments/cashfree-js";
 
 import { getCart } from "../../cart/services/cartService";
 import api from "../../../api/axios";
@@ -127,12 +128,13 @@ export default function CheckoutPage() {
 
       console.log("CHECKOUT STARTED");
 
+      // CREATE ORDER
       const orderResponse = await createOrder({
         addressId: selectedAddress,
         paymentMethod: "CASHFREE",
       });
 
-      console.log("ORDER RESPONSE:", orderResponse.data);
+      console.log("ORDER RESPONSE:", orderResponse);
 
       const orderId = orderResponse?.data?.id;
 
@@ -140,17 +142,27 @@ export default function CheckoutPage() {
         throw new Error("Order ID missing");
       }
 
+      // CREATE PAYMENT SESSION
       const paymentResponse = await createPaymentOrder(orderId);
 
-      console.log("PAYMENT RESPONSE:", paymentResponse.data);
+      console.log("FULL PAYMENT RESPONSE:", paymentResponse);
 
-      const paymentLink = paymentResponse?.data?.payment_link;
+      const paymentSessionId = paymentResponse?.data?.payment_session_id;
 
-      if (!paymentLink) {
-        throw new Error("Payment link not received");
+      if (!paymentSessionId) {
+        throw new Error("Payment session ID missing");
       }
 
-      window.location.href = paymentLink;
+      // LOAD CASHFREE SDK
+      const cashfree = await load({
+        mode: "sandbox",
+      });
+
+      // OPEN CASHFREE CHECKOUT
+      await cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: "_self",
+      });
     } catch (error) {
       console.error(error);
 
