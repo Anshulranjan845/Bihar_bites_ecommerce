@@ -62,6 +62,23 @@ export default function AppRoutes() {
           }
         />
 
+        <Route path="login" element={<LoginPage />} />
+
+        <Route path="register" element={<RegisterPage />} />
+
+        <Route path="unauthorized" element={<UnauthorizedPage />} />
+      </Route>
+
+
+      <Route
+        path="/products"
+        element={
+          <Suspense fallback={<p>Loading...</p>}>
+            <ProductsPage />
+          </Suspense>
+        }
+      />
+
         <Route path="login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
 
         <Route path="register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
