@@ -6,7 +6,7 @@ export default function AdminRoute({ children }) {
   const user = useAuthStore((state) => state.user);
 
   if (!user || user.role !== "ADMIN") {
-    return <Navigate to="/" />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

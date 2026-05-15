@@ -4,6 +4,7 @@ import {
   create,
   getAll,
   getSingle,
+  getSingleBySlug,
   update,
   remove,
 } from "./product.controller.js";
@@ -16,6 +17,8 @@ import {
 const router = express.Router();
 
 router.get("/", getAll);
+
+router.get("/slug/:slug", getSingleBySlug);
 
 router.get("/:id", getSingle);
 

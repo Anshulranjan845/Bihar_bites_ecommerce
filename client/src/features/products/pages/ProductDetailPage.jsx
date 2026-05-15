@@ -6,11 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getProductBySlug } from "../services/productService";
 import { addToCart } from "../../cart/services/cartService";
+import useCartStore from "../../cart/store/cartStore";
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
 
   const [quantity, setQuantity] = useState(1);
+
+  const syncFromCartResponse = useCartStore((state) => state.syncFromCartResponse);
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", slug],
@@ -25,12 +28,13 @@ export default function ProductDetailPage() {
   const product = data.data;
   const handleAddToCart = async () => {
     try {
-      await addToCart({
+      const response = await addToCart({
         productId: product.id,
 
         quantity,
       });
 
+      syncFromCartResponse(response);
       alert("Added to cart");
     } catch (error) {
       console.log(error);

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 import { getCart, removeCartItem } from "../services/cartService";
 
@@ -13,18 +14,26 @@ export default function CartPage() {
 
   useEffect(() => {
     const loadCart = async () => {
-      const response = await getCart();
-
-      setCart(response.data.items);
+      try {
+        const response = await getCart();
+        setCart(response?.data?.cartItems || []);
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to load cart");
+        setCart([]);
+      }
     };
 
     loadCart();
-  }, []);
+  }, [setCart]);
 
   const handleRemove = async (itemId) => {
-    await removeCartItem(itemId);
-
-    setCart(cartItems.filter((item) => item.id !== itemId));
+    try {
+      await removeCartItem(itemId);
+      setCart(cartItems.filter((item) => item.id !== itemId));
+      toast.success("Item removed from cart");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to remove item");
+    }
   };
 
   const subtotal = cartItems.reduce(
