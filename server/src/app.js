@@ -4,6 +4,7 @@ import productRoutes from "./modules/product/product.routes.js";
 import cartRoutes from "./modules/cart/cart.routes.js";
 import orderRoutes from "./modules/order/order.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
+import paymentRoutes from "./modules/payment/payment.routes.js";
 import userRoutes from "./modules/user/user.routes.js";
 
 import cors from "cors";
@@ -29,6 +30,7 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.get("/api/v1", (req, res) => {
   res.json({
