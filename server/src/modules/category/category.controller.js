@@ -1,38 +1,79 @@
-import { createCategory, getAllCategories } from "./category.service.js";
+// controllers/category.controller.js
+import {
+  createCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
+} from "../services/category.service.js";
 
-import { createCategorySchema } from "./category.validation.js";
-
-export const create = async (req, res) => {
+// CREATE
+export const createCategoryController = async (req, res) => {
   try {
-    const validatedData = createCategorySchema.parse(req.body);
-
-    const category = await createCategory(validatedData);
+    const category = await createCategory(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Category created successfully",
       data: category,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
   }
 };
 
-export const getAll = async (req, res) => {
+// GET ALL
+export const getAllCategoriesController = async (req, res) => {
   try {
     const categories = await getAllCategories();
 
-    res.status(200).json({
+    res.json({
       success: true,
       data: categories,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
+    });
+  }
+};
+
+// UPDATE
+export const updateCategoryController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updated = await updateCategory(id, req.body);
+
+    res.json({
+      success: true,
+      data: updated,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// DELETE
+export const deleteCategoryController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await deleteCategory(id);
+
+    res.json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
     });
   }
 };

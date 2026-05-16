@@ -20,6 +20,7 @@ import AdminRoute from "./AdminRoute";
 
 import MainLayout from "../layouts/MainLayout";
 import AdminLayout from "../layouts/AdminLayout";
+import CategoryPage from "../features/admin/pages/CategoryPage";
 
 import CreateProductPage from "../features/admin/pages/CreateProductPage";
 import AdminHomePage from "../features/admin/pages/AdminHomePage";
@@ -104,6 +105,8 @@ export default function AppRoutes() {
         <Route index element={<AdminHomePage />} />
 
         <Route path="products" element={<AdminProductsPage />} />
+
+        <Route path="categories" element={<CategoryPage />} />
 
         <Route path="products/create" element={<CreateProductPage />} />
       </Route>

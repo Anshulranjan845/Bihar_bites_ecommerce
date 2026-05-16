@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import CategoryForm from "../components/CategoryForm";
-import { getCategories } from "../services/categoryService";
+import {
+  getCategories,
+  deleteCategory,
+  updateCategory,
+} from "../services/categoryService";
 
 export default function CategoryPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // edit state
+  const [editingCategory, setEditingCategory] = useState(null);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await getCategories();
-      setCategories(response.data || []);
-    } catch (error) {
+      const res = await getCategories();
+      setCategories(res.data || []);
+    } catch {
       toast.error("Failed to load categories");
     } finally {
       setLoading(false);
@@ -23,79 +30,120 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
+  // DELETE
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this category?")) return;
+
+    try {
+      await deleteCategory(id);
+      toast.success("Category deleted");
+      fetchCategories();
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  // UPDATE
+  const handleUpdate = async () => {
+    try {
+      await updateCategory(editingCategory.id, editingCategory);
+      toast.success("Category updated");
+      setEditingCategory(null);
+      fetchCategories();
+    } catch {
+      toast.error("Update failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Category Management</h1>
-
-          <span className="text-sm text-gray-500">Admin Panel</span>
-        </div>
-
-        {/* Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT: FORM */}
-          <div className="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border">
-            <h2 className="text-lg font-semibold mb-4">Create Category</h2>
-
+          {/* CREATE */}
+          <div className="bg-white p-5 rounded-xl shadow">
             <CategoryForm onSuccess={fetchCategories} />
           </div>
 
-          {/* RIGHT: LIST */}
-          <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">All Categories</h2>
+          {/* LIST */}
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow">
+            <h2 className="text-lg font-bold mb-4">Categories</h2>
 
-              <span className="text-sm text-gray-500">
-                {categories.length} total
-              </span>
-            </div>
+            {categories.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex justify-between items-center border p-3 rounded mb-2"
+              >
+                <div>
+                  <p className="font-semibold">{cat.name}</p>
+                  <p className="text-sm text-gray-500">{cat.slug}</p>
+                </div>
 
-            {/* Loading */}
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-14 bg-gray-100 animate-pulse rounded-lg"
-                  />
-                ))}
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="text-center py-10 text-gray-500">
-                No categories found
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="p-4 border rounded-xl hover:shadow-md transition bg-white"
+                <div className="space-x-2">
+                  <button
+                    onClick={() => setEditingCategory(cat)}
+                    className="text-blue-600"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg">{cat.name}</h3>
-                        <p className="text-sm text-gray-500">/{cat.slug}</p>
-                      </div>
+                    Edit
+                  </button>
 
-                      {/* Badge */}
-                      <span className="text-xs px-2 py-1 bg-black text-white rounded-full">
-                        Category
-                      </span>
-                    </div>
-
-                    {cat.description && (
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                        {cat.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  <button
+                    onClick={() => handleDelete(cat.id)}
+                    className="text-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
+
+        {/* EDIT MODAL */}
+        {editingCategory && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded w-[400px] space-y-4">
+              <h2 className="text-lg font-bold">Edit Category</h2>
+
+              <input
+                className="w-full border p-2"
+                value={editingCategory.name}
+                onChange={(e) =>
+                  setEditingCategory({
+                    ...editingCategory,
+                    name: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                className="w-full border p-2"
+                value={editingCategory.slug}
+                onChange={(e) =>
+                  setEditingCategory({
+                    ...editingCategory,
+                    slug: e.target.value,
+                  })
+                }
+              />
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setEditingCategory(null)}
+                  className="px-3 py-1"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleUpdate}
+                  className="bg-black text-white px-3 py-1 rounded"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

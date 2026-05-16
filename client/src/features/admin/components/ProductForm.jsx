@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { createProduct, getCategories } from "../services/adminProductService";
 
 const initialState = {
@@ -16,13 +15,12 @@ const initialState = {
 export default function ProductForm() {
   const [formData, setFormData] = useState(initialState);
   const [imageFile, setImageFile] = useState(null);
-  const [categories, setCategories] = useState([
-    "sweets",
-    "savories",
-    "snacks",
-  ]);
+
+  const [categories, setCategories] = useState([]);
+
   const [submitting, setSubmitting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -30,6 +28,7 @@ export default function ProductForm() {
     ? formData.description.trim().split(/\s+/).length
     : 0;
 
+  // FETCH CATEGORIES
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -47,6 +46,7 @@ export default function ProductForm() {
     fetchCategories();
   }, []);
 
+  // IMAGE PREVIEW
   const imagePreview = useMemo(() => {
     if (!imageFile) return "";
     return URL.createObjectURL(imageFile);
@@ -60,6 +60,7 @@ export default function ProductForm() {
     };
   }, [imagePreview]);
 
+  // HANDLE INPUT
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -69,8 +70,10 @@ export default function ProductForm() {
     }));
   };
 
+  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setErrorMessage("");
     setSuccessMessage("");
 
@@ -81,8 +84,11 @@ export default function ProductForm() {
       }
 
       setSubmitting(true);
+
       await createProduct(formData, imageFile);
-      setSuccessMessage("Product created successfully.");
+
+      setSuccessMessage("Product created successfully 🎉");
+
       setFormData(initialState);
       setImageFile(null);
     } catch (error) {
@@ -95,9 +101,9 @@ export default function ProductForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form className="space-y-5" onSubmit={handleSubmit}>
+      {/* NAME */}
       <input
-        type="text"
         name="name"
         placeholder="Product Name"
         value={formData.name}
@@ -106,8 +112,8 @@ export default function ProductForm() {
         required
       />
 
+      {/* SLUG */}
       <input
-        type="text"
         name="slug"
         placeholder="Slug"
         value={formData.slug}
@@ -116,6 +122,7 @@ export default function ProductForm() {
         required
       />
 
+      {/* DESCRIPTION (ONLY ONE) */}
       <textarea
         name="description"
         placeholder="Description (max 200 words)"
@@ -124,21 +131,13 @@ export default function ProductForm() {
         className="w-full border p-3 rounded"
         rows={4}
       />
-      <p className="text-xs text-gray-500">{descriptionWords}/200 words</p>
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={formData.description}
-        onChange={handleChange}
-        className="w-full border p-3 rounded"
-        rows={4}
-      />
 
+      <p className="text-xs text-gray-500">{descriptionWords}/200 words</p>
+
+      {/* PRICE + STOCK */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           type="number"
-          min="0"
-          step="0.01"
           name="price"
           placeholder="Price"
           value={formData.price}
@@ -149,7 +148,6 @@ export default function ProductForm() {
 
         <input
           type="number"
-          min="0"
           name="stock"
           placeholder="Stock"
           value={formData.stock}
@@ -159,6 +157,7 @@ export default function ProductForm() {
         />
       </div>
 
+      {/* CATEGORY */}
       <select
         name="categoryId"
         value={formData.categoryId}
@@ -167,6 +166,7 @@ export default function ProductForm() {
         required
       >
         <option value="">Select Category</option>
+
         {categories.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
@@ -178,6 +178,7 @@ export default function ProductForm() {
         <p className="text-sm text-gray-600">Loading categories...</p>
       )}
 
+      {/* CHECKBOXES */}
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2">
           <input
@@ -200,27 +201,32 @@ export default function ProductForm() {
         </label>
       </div>
 
+      {/* IMAGE */}
       <input
         type="file"
-        accept=".jpg,.jpeg,.png,.webp"
         accept="image/*"
         onChange={(e) => setImageFile(e.target.files?.[0] || null)}
         className="w-full border p-3 rounded"
       />
 
+      {/* PREVIEW */}
       {imagePreview && (
         <img
           src={imagePreview}
-          alt="Product preview"
-          className="w-40 h-40 object-cover rounded-lg border"
+          alt="preview"
+          className="w-40 h-40 object-cover rounded border"
         />
       )}
 
+      {/* ERRORS */}
       {errorMessage && <p className="text-red-600 text-sm">{errorMessage}</p>}
+
+      {/* SUCCESS */}
       {successMessage && (
         <p className="text-green-700 text-sm">{successMessage}</p>
       )}
 
+      {/* SUBMIT */}
       <button
         disabled={submitting}
         className="bg-black text-white px-6 py-3 rounded disabled:opacity-60"
