@@ -18,7 +18,8 @@ export default function CategoryPage() {
     try {
       setLoading(true);
       const res = await getCategories();
-      setCategories(res.data || []);
+
+      setCategories((res.data || []).filter((cat) => !cat.isDeleted));
     } catch {
       toast.error("Failed to load categories");
     } finally {
