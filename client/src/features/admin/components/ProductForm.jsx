@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createProduct, getCategories } from "../services/adminProductService";
+import { createProduct } from "../services/productService.js";
+import { getCategories } from "../services/categoryService.js";
 
 const initialState = {
   name: "",

@@ -24,7 +24,7 @@ import CategoryPage from "../features/admin/pages/CategoryPage";
 
 import CreateProductPage from "../features/admin/pages/CreateProductPage";
 import AdminHomePage from "../features/admin/pages/AdminHomePage";
-import AdminProductsPage from "../features/admin/pages/AdminProductsPage";
+import AdminProductsPage from "../features/admin/pages/ProductsPage";
 
 const ProductsPage = lazy(
   () => import("../features/products/pages/ProductsPage"),

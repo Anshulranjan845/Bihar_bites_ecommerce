@@ -12,20 +12,48 @@ export default function CategoryForm({ onSuccess }) {
 
   const [loading, setLoading] = useState(false);
 
+  // Auto-generate slug from name
+  const generateSlug = (value) =>
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: value,
+      };
+
+      // auto slug only if user is typing name
+      if (name === "name") {
+        updated.slug = generateSlug(value);
+      }
+
+      return updated;
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.name || !formData.slug) {
+      toast.error("Name and slug are required");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      await createCategory(formData);
+      await createCategory({
+        ...formData,
+        name: formData.name.trim(),
+        slug: formData.slug.trim(),
+      });
 
       toast.success("Category created successfully 🎉");
 
@@ -36,7 +64,7 @@ export default function CategoryForm({ onSuccess }) {
         image: "",
       });
 
-      onSuccess?.(); // refresh list if needed
+      onSuccess?.();
     } catch (error) {
       toast.error(
         error?.response?.data?.message || "Failed to create category",
@@ -63,10 +91,10 @@ export default function CategoryForm({ onSuccess }) {
       <input
         type="text"
         name="slug"
-        placeholder="Slug (e.g. snacks)"
+        placeholder="Slug (auto-generated)"
         value={formData.slug}
         onChange={handleChange}
-        className="w-full border p-2 rounded"
+        className="w-full border p-2 rounded bg-gray-50"
         required
       />
 
@@ -90,7 +118,7 @@ export default function CategoryForm({ onSuccess }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white p-2 rounded"
+        className="w-full bg-black text-white p-2 rounded disabled:opacity-60"
       >
         {loading ? "Creating..." : "Create Category"}
       </button>
