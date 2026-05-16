@@ -54,6 +54,7 @@ model Category {
   description String?
 
   image String?
+  isDeleted   Boolean  @default(false)
 
   products Product[]
 

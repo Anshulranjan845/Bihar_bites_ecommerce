@@ -58,9 +58,19 @@ export const updateCategory = async (id, data) => {
   return category;
 };
 
-export const deleteCategory = async (id) =>
-  prisma.category.delete({
-    where: {
-      id,
+export const deleteCategory = async (id) => {
+  const category = await prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!category) {
+    throw new Error("Category not found");
+  }
+
+  await prisma.category.update({
+    where: { id },
+    data: {
+      isDeleted: true,
     },
   });
+};
