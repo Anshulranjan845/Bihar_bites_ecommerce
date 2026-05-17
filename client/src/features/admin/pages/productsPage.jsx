@@ -21,6 +21,27 @@ export default function ProductsPage() {
     });
     setProducts(res.data.products || []);
     setTotalPages(res.data.pagination?.totalPages || 1);
+    try {
+      setLoading(true);
+
+      const res = await api.get("/products", {
+        params: {
+          page,
+          limit,
+          search,
+          categoryId: categoryFilter,
+          includeUnavailable: true,
+          stock: stockFilter,
+        },
+      });
+
+      setProducts(res.data.products || []);
+      setTotalPages(res.data.pagination?.totalPages || 1);
+    } catch {
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchCategories = async () => {

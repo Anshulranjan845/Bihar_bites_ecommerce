@@ -58,6 +58,15 @@ export default function AdminHomePage({ section }) {
                 <p className="font-semibold">{order.user?.name} ({order.user?.email})</p>
                 <p className="font-bold">₹{order.totalAmount}</p>
               </div>
+
+  if (section === "orders") {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold mb-6">Order Management</h1>
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <div key={order.id} className="bg-white rounded-xl p-5 shadow border border-slate-200">
+              <div className="flex justify-between"><p className="font-semibold">{order.user?.name} ({order.user?.email})</p><p className="font-bold">₹{order.totalAmount}</p></div>
               <p className="text-sm text-slate-500">Status: {order.orderStatus} | Payment: {order.paymentStatus}</p>
               <p className="text-sm">Items: {order.orderItems?.map((i) => `${i.product?.name} x ${i.quantity}`).join(", ")}</p>
             </div>

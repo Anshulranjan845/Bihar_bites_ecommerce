@@ -28,6 +28,14 @@ export const getAllCategories = async () => {
   setCache(key, data, 120000);
   return data;
 };
+  return category;
+};
+
+export const getAllCategories = async () =>
+  prisma.category.findMany({
+    where: { isDeleted: false },
+    orderBy: { createdAt: "desc" },
+  });
 
 export const updateCategory = async (id, data) => {
   const existingCategory = await prisma.category.findFirst({
@@ -44,6 +52,7 @@ export const updateCategory = async (id, data) => {
   const updated = await prisma.category.update({ where: { id }, data });
   clearCacheByPrefix("categories:");
   return updated;
+  return prisma.category.update({ where: { id }, data });
 };
 
 export const deleteCategory = async (id, reassignedCategoryId) => {
