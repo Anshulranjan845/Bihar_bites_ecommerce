@@ -8,11 +8,15 @@ import {
 
 export const addItem = async (req, res) => {
   try {
-    const cart = await addToCart(
-      req.user.userId,
-      req.body.productId,
-      Number(req.body.quantity),
-    );
+    const quantity = Number(req.body.quantity);
+
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quantity",
+      });
+    }
+    const cart = await addToCart(req.user.userId, req.body.productId, quantity);
 
     res.status(200).json({
       success: true,
