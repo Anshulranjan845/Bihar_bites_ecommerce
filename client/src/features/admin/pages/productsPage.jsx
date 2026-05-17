@@ -1,345 +1,128 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../../api/axios";
-
-import { getCategories } from "../../admin/services/categoryService.js";
-import { getProducts, deleteProduct } from "../services/productService";
+import { getCategories } from "../services/categoryService";
+import { deleteProduct } from "../services/productService";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-
-  // filters
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [stockFilter, setStockFilter] = useState("");
-
-  // pagination
   const [page, setPage] = useState(1);
-  const [limit] = useState(5);
+  const [limit] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
-
-  // UI state
-  const [loading, setLoading] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
 
-  // ---------------- FETCH PRODUCTS ----------------
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
-
-      const res = await api.get("/products", {
-        params: {
-          page,
-          limit,
-          search,
-          categoryId: categoryFilter,
-          stock: stockFilter,
-        },
-      });
-
-      setProducts(res.data.data || []);
-      setTotalPages(res.data.totalPages || 1);
-    } catch {
-      toast.error("Failed to load products");
-    } finally {
-      setLoading(false);
-    }
+    const res = await api.get("/products", {
+      params: { page, limit, search, categoryId: categoryFilter, includeUnavailable: true },
+    });
+    setProducts(res.data.products || []);
+    setTotalPages(res.data.pagination?.totalPages || 1);
   };
 
-  // ---------------- FETCH CATEGORIES ----------------
   const fetchCategories = async () => {
-    try {
-      const res = await getCategories();
-      setCategories(res.data || []);
-    } catch {
-      toast.error("Failed to load categories");
-    }
+    const res = await getCategories();
+    setCategories(res.data || []);
   };
 
+  useEffect(() => { fetchCategories().catch(() => toast.error("Failed to load categories")); }, []);
+  useEffect(() => { fetchProducts().catch(() => toast.error("Failed to load products")); }, [page, categoryFilter]);
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [page, categoryFilter, stockFilter]);
-
-  // debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchProducts();
-    }, 400);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => {
+      setPage(1);
+      fetchProducts().catch(() => toast.error("Failed to load products"));
+    }, 350);
+    return () => clearTimeout(t);
   }, [search]);
 
-  // ---------------- DELETE ----------------
   const handleDelete = async (id) => {
-    if (!confirm("Delete product?")) return;
-
-    try {
-      await deleteProduct(id);
-      toast.success("Deleted");
-      fetchProducts();
-    } catch {
-      toast.error("Delete failed");
-    }
+    if (!window.confirm("Delete this product from inventory?")) return;
+    await deleteProduct(id);
+    toast.success("Product deleted");
+    fetchProducts();
   };
 
-  // ---------------- UPDATE ----------------
-  const handleUpdate = async () => {
-    try {
-      const formData = new FormData();
+  const pageButtons = useMemo(() => Array.from({ length: totalPages }, (_, i) => i + 1), [totalPages]);
 
-      formData.append("name", editingProduct.name);
-      formData.append("price", editingProduct.price);
-      formData.append("stock", editingProduct.stock);
-      formData.append("categoryId", editingProduct.categoryId);
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold">Inventory Management</h1>
+        <Link to="/admin/products/create" className="rounded-lg bg-slate-900 text-white px-4 py-2">+ Add Product</Link>
+      </div>
 
-      if (imageFile) {
-        formData.append("image", imageFile);
-      }
+      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3">
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="border rounded-lg px-3 py-2 min-w-60" />
+        <select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }} className="border rounded-lg px-3 py-2">
+          <option value="">All Categories</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
 
-      await api.put(`/products/${editingProduct.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      <div className="bg-white border rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-100">
+            <tr><th className="p-3 text-left">Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {products.map((p) => (
+              <tr key={p.id} className="border-t">
+                <td className="p-3"><img src={p.image} alt={p.name} className="w-12 h-12 object-cover rounded" /></td>
+                <td>{p.name}</td><td>{p.category?.name}</td><td>₹{p.price}</td><td>{p.stock}</td>
+                <td className="space-x-2">
+                  <button onClick={() => setEditingProduct(p)} className="text-blue-600">Edit</button>
+                  <button onClick={() => handleDelete(p.id).catch(() => toast.error("Delete failed"))} className="text-red-600">Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      toast.success("Product updated");
+      <div className="flex justify-center gap-2">
+        <button disabled={page===1} onClick={() => setPage((p)=>p-1)} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
+        {pageButtons.map((n) => <button key={n} onClick={() => setPage(n)} className={`px-3 py-1 border rounded ${n===page?"bg-slate-900 text-white":""}`}>{n}</button>)}
+        <button disabled={page===totalPages} onClick={() => setPage((p)=>p+1)} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+      </div>
 
-      setEditingProduct(null);
-      setImageFile(null);
-      fetchProducts();
-    } catch {
-      toast.error("Update failed");
-    }
+      {editingProduct && (
+        <EditProductModal
+          product={editingProduct}
+          categories={categories}
+          onClose={() => setEditingProduct(null)}
+          onSaved={() => { setEditingProduct(null); fetchProducts(); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditProductModal({ product, categories, onClose, onSaved }) {
+  const [form, setForm] = useState({ name: product.name, price: product.price, stock: product.stock, categoryId: product.categoryId });
+
+  const save = async () => {
+    await api.put(`/products/${product.id}`, form);
+    toast.success("Product updated");
+    onSaved();
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-4">
-        {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Product Admin Panel</h1>
-
-          <input
-            className="border p-2 rounded"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl p-5 w-full max-w-lg space-y-3">
+        <h3 className="text-xl font-bold">Edit Product</h3>
+        <input className="w-full border rounded p-2" value={form.name} onChange={(e)=>setForm({...form,name:e.target.value})} />
+        <div className="grid grid-cols-2 gap-2">
+          <input type="number" className="w-full border rounded p-2" value={form.price} onChange={(e)=>setForm({...form,price:Number(e.target.value)})} />
+          <input type="number" className="w-full border rounded p-2" value={form.stock} onChange={(e)=>setForm({...form,stock:Number(e.target.value)})} />
         </div>
-
-        {/* FILTERS */}
-        <div className="flex gap-3 flex-wrap">
-          <select
-            className="border p-2 rounded"
-            value={categoryFilter}
-            onChange={(e) => {
-              setPage(1);
-              setCategoryFilter(e.target.value);
-            }}
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="border p-2 rounded"
-            value={stockFilter}
-            onChange={(e) => {
-              setPage(1);
-              setStockFilter(e.target.value);
-            }}
-          >
-            <option value="">All Stock</option>
-            <option value="low">Low Stock</option>
-            <option value="out">Out of Stock</option>
-          </select>
-        </div>
-
-        {/* TABLE */}
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-3">Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t">
-                  <td className="p-3">
-                    <img
-                      src={p.image}
-                      className="w-12 h-12 rounded object-cover"
-                    />
-                  </td>
-
-                  <td>{p.name}</td>
-
-                  <td>{p.category?.name}</td>
-
-                  <td>₹{p.price}</td>
-
-                  <td>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        p.stock < 5 ? "bg-red-100" : "bg-green-100"
-                      }`}
-                    >
-                      {p.stock}
-                    </span>
-                  </td>
-
-                  <td className="space-x-2">
-                    <button
-                      onClick={() => setEditingProduct(p)}
-                      className="text-blue-600"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="text-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div className="flex justify-center gap-2">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 border rounded ${
-                page === i + 1 ? "bg-black text-white" : ""
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        <select className="w-full border rounded p-2" value={form.categoryId} onChange={(e)=>setForm({...form,categoryId:e.target.value})}>
+          {categories.map((c)=><option value={c.id} key={c.id}>{c.name}</option>)}
+        </select>
+        <div className="text-right space-x-2"><button onClick={onClose}>Cancel</button><button className="bg-slate-900 text-white px-3 py-1 rounded" onClick={() => save().catch(()=>toast.error("Update failed"))}>Save</button></div>
       </div>
-
-      {/* EDIT MODAL */}
-      {editingProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white w-[450px] p-6 rounded space-y-3">
-            <h2 className="text-xl font-bold">Edit Product</h2>
-
-            <input
-              className="w-full border p-2"
-              value={editingProduct.name}
-              onChange={(e) =>
-                setEditingProduct({
-                  ...editingProduct,
-                  name: e.target.value,
-                })
-              }
-            />
-
-            <input
-              className="w-full border p-2"
-              value={editingProduct.price}
-              onChange={(e) =>
-                setEditingProduct({
-                  ...editingProduct,
-                  price: e.target.value,
-                })
-              }
-            />
-
-            <input
-              className="w-full border p-2"
-              value={editingProduct.stock}
-              onChange={(e) =>
-                setEditingProduct({
-                  ...editingProduct,
-                  stock: e.target.value,
-                })
-              }
-            />
-
-            <select
-              className="w-full border p-2"
-              value={editingProduct.categoryId}
-              onChange={(e) =>
-                setEditingProduct({
-                  ...editingProduct,
-                  categoryId: e.target.value,
-                })
-              }
-            >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files[0])}
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setEditingProduct(null);
-                  setImageFile(null);
-                }}
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleUpdate}
-                className="bg-black text-white px-4 py-2 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

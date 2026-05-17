@@ -23,3 +23,9 @@ export const logoutUser = async () => {
 
   return response.data;
 };
+
+
+export const googleAuth = async (idToken) => {
+  const response = await api.post("/auth/google", { idToken });
+  return response.data;
+};
