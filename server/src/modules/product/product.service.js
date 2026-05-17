@@ -1,3 +1,4 @@
+import { getCache, setCache, clearCacheByPrefix } from "../../utils/cache.js";
 import prisma from "../../lib/prisma.js";
 
 export const createProduct = async (data) => {
@@ -29,11 +30,15 @@ export const createProduct = async (data) => {
     },
   });
 
+  clearCacheByPrefix("products:");
   return product;
 };
 
 export const getAllProducts = async (query) => {
-  const { page = 1, limit = 10, search = "", category, featured, sort } = query;
+  const key = `products:${JSON.stringify(query)}`;
+  const cached = getCache(key);
+  if (cached) return cached;
+  const { page = 1, limit = 10, search = "", category, categoryId, featured, sort, includeUnavailable } = query;
 
   const skip = (Number(page) - 1) * Number(limit);
 
@@ -48,11 +53,7 @@ export const getAllProducts = async (query) => {
           }
         : {},
 
-      category
-        ? {
-            categoryId: category,
-          }
-        : {},
+      (category || categoryId) ? { categoryId: category || categoryId } : {},
 
       featured === "true"
         ? {
@@ -60,9 +61,7 @@ export const getAllProducts = async (query) => {
           }
         : {},
 
-      {
-        isAvailable: true,
-      },
+      includeUnavailable === "true" ? {} : { isAvailable: true },
     ],
   };
 
@@ -100,7 +99,7 @@ export const getAllProducts = async (query) => {
     where,
   });
 
-  return {
+  const payload = {
     products,
 
     pagination: {
@@ -110,6 +109,8 @@ export const getAllProducts = async (query) => {
       totalPages: Math.ceil(total / Number(limit)),
     },
   };
+  setCache(key, payload, 60000);
+  return payload;
 };
 
 export const getSingleProduct = async (id) => {
@@ -153,7 +154,7 @@ export const updateProduct = async (id, data) => {
     throw new Error("Product not found");
   }
 
-  return prisma.product.update({
+  const updated = await prisma.product.update({
     where: { id },
 
     data,
@@ -162,6 +163,8 @@ export const updateProduct = async (id, data) => {
       category: true,
     },
   });
+  clearCacheByPrefix("products:");
+  return updated;
 };
 
 export const deleteProduct = async (id) => {
@@ -173,7 +176,9 @@ export const deleteProduct = async (id) => {
     throw new Error("Product not found");
   }
 
-  return prisma.product.delete({
+  const deleted = await prisma.product.delete({
     where: { id },
   });
+  clearCacheByPrefix("products:");
+  return deleted;
 };

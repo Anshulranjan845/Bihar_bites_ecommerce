@@ -24,7 +24,7 @@ import CategoryPage from "../features/admin/pages/CategoryPage";
 
 import CreateProductPage from "../features/admin/pages/CreateProductPage";
 import AdminHomePage from "../features/admin/pages/AdminHomePage";
-import AdminProductsPage from "../features/admin/pages/ProductsPage";
+import AdminProductsPage from "../features/admin/pages/productsPage";
 
 const ProductsPage = lazy(
   () => import("../features/products/pages/ProductsPage"),
@@ -109,6 +109,7 @@ export default function AppRoutes() {
         <Route path="categories" element={<CategoryPage />} />
 
         <Route path="products/create" element={<CreateProductPage />} />
+        <Route path="orders" element={<AdminHomePage section="orders" />} />
       </Route>
     </Routes>
   );

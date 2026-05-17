@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/authService";
+import { googleAuth, loginUser } from "../services/authService";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function LoginPage() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -12,6 +14,25 @@ export default function LoginPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+
+  const handleGoogleAuth = async () => {
+    try {
+      if (!window.google || !GOOGLE_CLIENT_ID) throw new Error("Google config missing");
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          const res = await googleAuth(response.credential);
+          toast.success("Google login successful");
+          setUser(res.data);
+          setTimeout(() => navigate("/"), 500);
+        },
+      });
+      window.google.accounts.id.prompt();
+    } catch (error) {
+      toast.error(error.message || "Google auth failed");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -42,7 +63,7 @@ export default function LoginPage() {
           <input type="password" name="password" placeholder="Password" onChange={handleChange} className="w-full rounded-xl border border-zinc-300 p-3 focus:outline-none focus:ring-2 focus:ring-orange-500" required />
           <button type="submit" className="w-full rounded-xl bg-zinc-900 text-white p-3 font-semibold hover:bg-zinc-700 transition">Login</button>
           <p className="text-sm text-zinc-600">New to Bihar Bites? <Link to="/register" className="text-orange-700 font-semibold hover:underline">Create an account</Link></p>
-        </form>
+        <button type="button" onClick={handleGoogleAuth} className="w-full rounded-xl border border-zinc-300 p-3 font-semibold hover:bg-zinc-100 transition">Continue with Google</button></form>
       </div>
     </section>
   );

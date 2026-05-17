@@ -179,3 +179,28 @@ export const resetPassword = async (token, password) => {
     message: "Password reset successful",
   };
 };
+
+
+export const loginWithGoogle = async (idToken) => {
+  const resp = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+  if (!resp.ok) throw new Error("Invalid Google token");
+  const payload = await resp.json();
+  if (!payload.email || payload.email_verified !== "true") throw new Error("Google email not verified");
+
+  let user = await prisma.user.findUnique({ where: { email: payload.email } });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        name: payload.name || payload.email.split("@")[0],
+        email: payload.email,
+        password: null,
+        role: "USER",
+      },
+    });
+  }
+
+  const token = generateToken({ userId: user.id, role: user.role });
+
+  return { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+};
