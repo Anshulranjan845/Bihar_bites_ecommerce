@@ -1,6 +1,8 @@
 import { getCache, setCache, clearCacheByPrefix } from "../../utils/cache.js";
+
 import prisma from "../../lib/prisma.js";
 
+// CREATE ORDER
 export const createOrder = async (userId, addressId, paymentMethod) => {
   console.log("CHECKOUT USER:", userId);
 
@@ -21,12 +23,12 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
 
   console.log("CART:", JSON.stringify(cart, null, 2));
 
-  // CHECK EMPTY CART
+  // EMPTY CART CHECK
   if (!cart || cart.cartItems.length === 0) {
     throw new Error("Cart is empty");
   }
 
-  // CHECK ADDRESS
+  // ADDRESS CHECK
   const address = await prisma.address.findUnique({
     where: {
       id: addressId,
@@ -37,11 +39,11 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
     throw new Error("Address not found");
   }
 
-  // CALCULATE TOTAL
+  // TOTAL CALCULATION
   let totalAmount = 0;
 
   for (const item of cart.cartItems) {
-    // STOCK VALIDATION
+    // STOCK CHECK
     if (item.quantity > item.product.stock) {
       throw new Error(`${item.product.name} is out of stock`);
     }
@@ -49,9 +51,7 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
     totalAmount += Number(item.product.price) * item.quantity;
   }
 
-  // CREATE ORDER ONLY
-  // DO NOT CLEAR CART YET
-  // DO NOT REDUCE STOCK YET
+  // CREATE ORDER
   const order = await prisma.$transaction(async (tx) => {
     const createdOrder = await tx.order.create({
       data: {
@@ -85,6 +85,7 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
   });
 
   clearCacheByPrefix("orders:");
+
   return order;
 };
 
@@ -93,6 +94,13 @@ export const getUserOrders = async (userId) => {
   const key = `orders:user:${userId}`;
   const cached = getCache(key);
   if (cached) return cached;
+
+  const cached = getCache(key);
+
+  if (cached) {
+    return cached;
+  }
+
   const data = await prisma.order.findMany({
     where: {
       userId,
@@ -130,5 +138,47 @@ export const getAllOrders = async () => {
     orderBy: { createdAt: "desc" },
   });
   setCache(key, data, 45000);
+
+  setCache(key, data, 45000);
+
+  return data;
+};
+
+// GET ALL ORDERS
+export const getAllOrders = async () => {
+  const key = "orders:all";
+
+  const cached = getCache(key);
+
+  if (cached) {
+    return cached;
+  }
+
+  const data = await prisma.order.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+
+      address: true,
+
+      orderItems: {
+        include: {
+          product: true,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  setCache(key, data, 45000);
+
   return data;
 };
