@@ -53,8 +53,8 @@ model Category {
 
   description String?
 
-  image String?
-  isDeleted   Boolean  @default(false)
+  image     String?
+  isDeleted Boolean @default(false)
 
   products Product[]
 
@@ -82,7 +82,7 @@ model Product {
 
   categoryId String
 
-  category Category @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   orderItems OrderItem[]
   cartItems  CartItem[]
@@ -103,7 +103,7 @@ model Address {
   postalCode  String
 
   userId String
-  user   User    @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
 
   createdAt DateTime @default(now())
@@ -113,12 +113,12 @@ model Order {
   id String @id @default(uuid())
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   totalAmount Float
   addressId   String
 
-  address       Address       @relation(fields: [addressId], references: [id])
+  address       Address       @relation(fields: [addressId], references: [id], onDelete: Cascade)
   orderStatus   OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(PENDING)
 
@@ -136,10 +136,10 @@ model OrderItem {
   id String @id @default(uuid())
 
   orderId String
-  order   Order  @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   quantity Int
   price    Float
@@ -152,7 +152,7 @@ model Cart {
 
   userId String @unique
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   cartItems CartItem[]
 
@@ -164,10 +164,10 @@ model CartItem {
   id String @id @default(uuid())
 
   cartId String
-  cart   Cart   @relation(fields: [cartId], references: [id])
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   quantity Int @default(1)
 
