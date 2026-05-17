@@ -38,7 +38,16 @@ export const getAllProducts = async (query) => {
   const key = `products:${JSON.stringify(query)}`;
   const cached = getCache(key);
   if (cached) return cached;
-  const { page = 1, limit = 10, search = "", category, categoryId, featured, sort, includeUnavailable } = query;
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    category,
+    categoryId,
+    featured,
+    sort,
+    includeUnavailable,
+  } = query;
 
   const skip = (Number(page) - 1) * Number(limit);
 
@@ -53,7 +62,7 @@ export const getAllProducts = async (query) => {
           }
         : {},
 
-      (category || categoryId) ? { categoryId: category || categoryId } : {},
+      category || categoryId ? { categoryId: category || categoryId } : {},
 
       featured === "true"
         ? {
@@ -129,7 +138,6 @@ export const getSingleProduct = async (id) => {
   return product;
 };
 
-
 export const getSingleProductBySlug = async (slug) => {
   const product = await prisma.product.findUnique({
     where: { slug },
@@ -163,7 +171,9 @@ export const updateProduct = async (id, data) => {
       category: true,
     },
   });
+
   clearCacheByPrefix("products:");
+
   return updated;
 };
 
@@ -179,6 +189,8 @@ export const deleteProduct = async (id) => {
   const deleted = await prisma.product.delete({
     where: { id },
   });
+
   clearCacheByPrefix("products:");
+
   return deleted;
 };
