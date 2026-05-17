@@ -35,12 +35,13 @@ export default function ProductsPage() {
           limit,
           search,
           categoryId: categoryFilter,
+          includeUnavailable: true,
           stock: stockFilter,
         },
       });
 
-      setProducts(res.data.data || []);
-      setTotalPages(res.data.totalPages || 1);
+      setProducts(res.data.products || []);
+      setTotalPages(res.data.pagination?.totalPages || 1);
     } catch {
       toast.error("Failed to load products");
     } finally {
