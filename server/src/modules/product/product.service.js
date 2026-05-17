@@ -33,7 +33,7 @@ export const createProduct = async (data) => {
 };
 
 export const getAllProducts = async (query) => {
-  const { page = 1, limit = 10, search = "", category, featured, sort } = query;
+  const { page = 1, limit = 10, search = "", category, categoryId, featured, sort, includeUnavailable } = query;
 
   const skip = (Number(page) - 1) * Number(limit);
 
@@ -48,11 +48,7 @@ export const getAllProducts = async (query) => {
           }
         : {},
 
-      category
-        ? {
-            categoryId: category,
-          }
-        : {},
+      (category || categoryId) ? { categoryId: category || categoryId } : {},
 
       featured === "true"
         ? {
@@ -60,9 +56,7 @@ export const getAllProducts = async (query) => {
           }
         : {},
 
-      {
-        isAvailable: true,
-      },
+      includeUnavailable === "true" ? {} : { isAvailable: true },
     ],
   };
 
