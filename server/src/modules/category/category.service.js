@@ -13,6 +13,21 @@ export const createCategory = async (data) => {
   }
 
   const category = await prisma.category.create({ data });
+  clearCacheByPrefix("categories:");
+  return category;
+};
+
+export const getAllCategories = async () => {
+  const key = "categories:all";
+  const cached = getCache(key);
+  if (cached) return cached;
+  const data = await prisma.category.findMany({
+    where: { isDeleted: false },
+    orderBy: { createdAt: "desc" },
+  });
+  setCache(key, data, 120000);
+  return data;
+};
   return category;
 };
 
@@ -34,6 +49,9 @@ export const updateCategory = async (id, data) => {
     throw new Error("Category already exists");
   }
 
+  const updated = await prisma.category.update({ where: { id }, data });
+  clearCacheByPrefix("categories:");
+  return updated;
   return prisma.category.update({ where: { id }, data });
 };
 

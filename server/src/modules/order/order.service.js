@@ -84,6 +84,8 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
 // GET USER ORDERS
 export const getUserOrders = async (userId) => {
   const key = `orders:user:${userId}`;
+  const cached = getCache(key);
+  if (cached) return cached;
 
   const cached = getCache(key);
 
@@ -108,6 +110,24 @@ export const getUserOrders = async (userId) => {
       createdAt: "desc",
     },
   });
+  setCache(key, data, 45000);
+  return data;
+};
+
+
+export const getAllOrders = async () => {
+  const key = "orders:all";
+  const cached = getCache(key);
+  if (cached) return cached;
+  const data = await prisma.order.findMany({
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      address: true,
+      orderItems: { include: { product: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  setCache(key, data, 45000);
 
   setCache(key, data, 45000);
 

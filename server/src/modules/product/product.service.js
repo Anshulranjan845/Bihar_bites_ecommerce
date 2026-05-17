@@ -35,6 +35,9 @@ export const createProduct = async (data) => {
 };
 
 export const getAllProducts = async (query) => {
+  const key = `products:${JSON.stringify(query)}`;
+  const cached = getCache(key);
+  if (cached) return cached;
   const { page = 1, limit = 10, search = "", category, categoryId, featured, sort, includeUnavailable } = query;
 
   const skip = (Number(page) - 1) * Number(limit);
