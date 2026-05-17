@@ -49,28 +49,20 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
     totalAmount += Number(item.product.price) * item.quantity;
   }
 
-  // CREATE ORDER ONLY
-  // DO NOT CLEAR CART YET
-  // DO NOT REDUCE STOCK YET
+  // CREATE ORDER
   const order = await prisma.$transaction(async (tx) => {
     const createdOrder = await tx.order.create({
       data: {
         userId,
-
         addressId,
-
         paymentMethod,
-
         totalAmount,
-
         orderStatus: "PENDING",
 
         orderItems: {
           create: cart.cartItems.map((item) => ({
             productId: item.productId,
-
             quantity: item.quantity,
-
             price: item.product.price,
           })),
         },
@@ -85,14 +77,18 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
   });
 
   clearCacheByPrefix("orders:");
+
   return order;
 };
 
 // GET USER ORDERS
 export const getUserOrders = async (userId) => {
   const key = `orders:user:${userId}`;
+
   const cached = getCache(key);
+
   if (cached) return cached;
+
   const data = await prisma.order.findMany({
     where: {
       userId,
@@ -112,35 +108,45 @@ export const getUserOrders = async (userId) => {
       createdAt: "desc",
     },
   });
+
   setCache(key, data, 45000);
+
   return data;
 };
 
-
+// GET ALL ORDERS
 export const getAllOrders = async () => {
   const key = "orders:all";
+
   const cached = getCache(key);
+
   if (cached) return cached;
+
   const data = await prisma.order.findMany({
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+
       address: true,
-      orderItems: { include: { product: true } },
+
+      orderItems: {
+        include: {
+          product: true,
+        },
+      },
     },
-    orderBy: { createdAt: "desc" },
+
+    orderBy: {
+      createdAt: "desc",
+    },
   });
+
   setCache(key, data, 45000);
+
   return data;
-};
-
-
-export const getAllOrders = async () => {
-  return prisma.order.findMany({
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      address: true,
-      orderItems: { include: { product: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
 };
