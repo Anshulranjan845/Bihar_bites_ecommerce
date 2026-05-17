@@ -132,3 +132,15 @@ export const getAllOrders = async () => {
   setCache(key, data, 45000);
   return data;
 };
+
+
+export const getAllOrders = async () => {
+  return prisma.order.findMany({
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      address: true,
+      orderItems: { include: { product: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};
