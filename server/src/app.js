@@ -15,7 +15,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://your-netlify-site.netlify.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://bihar-bites-ecommerce-ojs74gqst-anshulranjan845s-projects.vercel.app",
+    ],
     credentials: true,
   }),
 );
