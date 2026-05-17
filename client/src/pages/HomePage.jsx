@@ -323,11 +323,11 @@ export default function HomePage() {
             alt=""
             aria-hidden
             className="w-full h-full object-cover opacity-20"
-            fetchpriority="high"
+            fetchPriority="high"
           />
           {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-950 via-amber-950/80 to-amber-900/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-amber-950/90 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-amber-950 via-amber-950/80 to-amber-900/40" />
+          <div className="absolute inset-0 bg-linear-to-t from-amber-950/90 via-transparent to-transparent" />
         </motion.div>
 
         {/* Mithila pattern overlay */}
@@ -343,7 +343,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 + i * 0.1 }}
-              className="flex-shrink-0 flex items-center gap-3 px-6 py-4 border-r border-white/10 last:border-0"
+              className="shrink-0 flex items-center gap-3 px-6 py-4 border-r border-white/10 last:border-0"
             >
               <span className="text-2xl">{item.emoji}</span>
               <div>
