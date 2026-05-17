@@ -1,4 +1,4 @@
-import { loginUser, registerUser } from "./auth.service.js";
+import { loginUser, registerUser, loginWithGoogle } from "./auth.service.js";
 
 import { loginSchema, registerSchema } from "./auth.validation.js";
 
@@ -117,5 +117,17 @@ export const resetPasswordHandler = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    const result = await loginWithGoogle(idToken);
+    setAuthCookie(res, result.token);
+    res.status(200).json({ success: true, message: "Google auth successful", data: result.user });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };

@@ -1,3 +1,4 @@
+import { getCache, setCache, clearCacheByPrefix } from "../../utils/cache.js";
 import prisma from "../../lib/prisma.js";
 
 export const createCategory = async (data) => {
@@ -68,4 +69,6 @@ export const deleteCategory = async (id, reassignedCategoryId) => {
     }
     await tx.category.update({ where: { id }, data: { isDeleted: true } });
   });
+  clearCacheByPrefix("categories:");
+  clearCacheByPrefix("products:");
 };

@@ -1,3 +1,4 @@
+import { getCache, setCache, clearCacheByPrefix } from "../../utils/cache.js";
 import prisma from "../../lib/prisma.js";
 
 export const createOrder = async (userId, addressId, paymentMethod) => {
@@ -83,12 +84,16 @@ export const createOrder = async (userId, addressId, paymentMethod) => {
     return createdOrder;
   });
 
+  clearCacheByPrefix("orders:");
   return order;
 };
 
 // GET USER ORDERS
 export const getUserOrders = async (userId) => {
-  return prisma.order.findMany({
+  const key = `orders:user:${userId}`;
+  const cached = getCache(key);
+  if (cached) return cached;
+  const data = await prisma.order.findMany({
     where: {
       userId,
     },
@@ -107,6 +112,25 @@ export const getUserOrders = async (userId) => {
       createdAt: "desc",
     },
   });
+  setCache(key, data, 45000);
+  return data;
+};
+
+
+export const getAllOrders = async () => {
+  const key = "orders:all";
+  const cached = getCache(key);
+  if (cached) return cached;
+  const data = await prisma.order.findMany({
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      address: true,
+      orderItems: { include: { product: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  setCache(key, data, 45000);
+  return data;
 };
 
 

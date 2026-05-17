@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../services/authService";
+import { googleAuth, registerUser } from "../services/authService";
 import toast from "react-hot-toast";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -9,6 +11,24 @@ export default function RegisterPage() {
   const isDev = useMemo(() => import.meta.env.DEV, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+
+  const handleGoogleAuth = async () => {
+    try {
+      if (!window.google || !GOOGLE_CLIENT_ID) throw new Error("Google config missing");
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          const res = await googleAuth(response.credential);
+          toast.success("Google login successful");
+          setTimeout(() => navigate("/"), 500);
+        },
+      });
+      window.google.accounts.id.prompt();
+    } catch (error) {
+      toast.error(error.message || "Google auth failed");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +73,7 @@ export default function RegisterPage() {
           )}
           <button type="submit" className="w-full rounded-xl bg-orange-600 text-white p-3 font-semibold hover:bg-orange-700 transition">Create Account</button>
           <p className="text-sm text-zinc-600">Already have an account? <Link to="/login" className="text-orange-700 font-semibold hover:underline">Login</Link></p>
-        </form>
+        <button type="button" onClick={handleGoogleAuth} className="w-full rounded-xl border border-zinc-300 p-3 font-semibold hover:bg-zinc-100 transition">Continue with Google</button></form>
       </div>
     </section>
   );
