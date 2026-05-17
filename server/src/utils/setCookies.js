@@ -1,17 +1,20 @@
 export const setAuthCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
-
     secure: process.env.NODE_ENV === "production",
-
     sameSite: "none",
-
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
 export const clearAuthCookie = (res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    path: "/",
+  });
 };
 
 export const isAuth = (req) => {

@@ -2,6 +2,7 @@ import prisma from "../../lib/prisma.js";
 
 export const addToCart = async (userId, productId, quantity) => {
   console.log("ADD TO CART USER:", userId);
+  console.log("cookies", request.cookies);
   const product = await prisma.product.findUnique({
     where: {
       id: productId,
