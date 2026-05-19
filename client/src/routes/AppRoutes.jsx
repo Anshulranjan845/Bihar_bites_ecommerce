@@ -25,6 +25,7 @@ import CategoryPage from "../features/admin/pages/CategoryPage";
 import CreateProductPage from "../features/admin/pages/CreateProductPage";
 import AdminHomePage from "../features/admin/pages/AdminHomePage";
 import AdminProductsPage from "../features/admin/pages/productsPage";
+import ChangePasswordPage from "../features/auth/pages/ChangePasswordPage";
 
 const ProductsPage = lazy(
   () => import("../features/products/pages/ProductsPage"),
@@ -47,6 +48,15 @@ export default function AppRoutes() {
         />
 
         <Route path="products/:slug" element={<ProductDetailPage />} />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="cart"
